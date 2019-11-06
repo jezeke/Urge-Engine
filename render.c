@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <unistd.h> //debug
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 //#include <X11/extensions/Xshm.h>
@@ -13,6 +15,7 @@ void* render_main(void *data)
 {
   Display *display;
   Window win;
+  int done = 0;
 
   renderData *rData = (renderData*)data;
   const int hoz = rData->hoz;
@@ -29,8 +32,9 @@ void* render_main(void *data)
   const unsigned int display_width = DisplayWidth(display, DefaultScreen(display));
   const unsigned int display_height = DisplayHeight(display, DefaultScreen(display));
 
-  if(hoz > display_width || vert > display_width)
+  if(hoz > display_width || vert > display_height)
   { //oversized windows spawn within bounds of display
+    logging("Render warning: Oversized window, continuing.");
     win = createWindow(display, hoz, vert, 0, 0);
   }
   else
@@ -41,7 +45,7 @@ void* render_main(void *data)
     win = createWindow(display, hoz, vert, xOffset, yOffset);
   }
 
-  //do stuff
+  sleep(3); //debug
 
   XCloseDisplay(display);
   rData->returnCode = 0;
@@ -53,9 +57,15 @@ Window createWindow(Display *display, int hoz, int vert, int xOffset, int yOffse
 {
   const int screen = DefaultScreen(display);
   Window win;
+  XSizeHints hint; //hack to get window spawning in middle of screen
 
   win = XCreateSimpleWindow(display, RootWindow(display, screen), xOffset, yOffset, hoz, vert, 2, BlackPixel(display, screen), WhitePixel(display, screen));
 
+  hint.x = xOffset;
+  hint.y = yOffset;
+  hint.flags = PPosition;
+
+  XSetNormalHints(display, win, &hint);
   XMapWindow(display, win);
   XFlush(display);
 
