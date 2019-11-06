@@ -13,16 +13,17 @@ Window createWindow(Display *display, int hoz, int vert, int xOffset, int yOffse
 
 void* render_main(void *data)
 {
-  Display *display;
   Window win;
+  time_t lastFrame;
+  unsigned int frames;
   int done = 0;
 
+  Display *display = XOpenDisplay(getenv("DISPLAY"));
   renderData *rData = (renderData*)data;
   const int hoz = rData->hoz;
   const int vert = rData->vert;
   const int fps = rData->fps;
 
-  display = XOpenDisplay(getenv("DISPLAY"));
   if(display == NULL)
   {
     logging("Render error: cannot connect to X server.");
@@ -45,13 +46,32 @@ void* render_main(void *data)
     win = createWindow(display, hoz, vert, xOffset, yOffset);
   }
 
-  sleep(3); //debug
+  while(!done)
+  {
+    lastFrame = time(0);
+    frames = 0;
+
+    do
+    { //FIXME sucky busy waiting
+      if(frames < fps)
+      {
+        //drawFrame(win, rData->grid);
+        frames++;
+      }
+    }
+    while(lastFrame == time(0));
+  }
 
   XCloseDisplay(display);
   rData->returnCode = 0;
 
   return NULL;
 }
+
+/*void drawFrame(Window win, CellMatrix *grid)
+{
+
+}*/
 
 Window createWindow(Display *display, int hoz, int vert, int xOffset, int yOffset)
 {
