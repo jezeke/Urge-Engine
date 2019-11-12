@@ -16,14 +16,11 @@ void initMatrix(CellMatrix *grid, unsigned int hoz, unsigned int vert);
 
 int main(int argc, char *argv[])
 {
-  pthread_t render; //one is enough yeah?
   renderData *rData;
-  pthread_t simulation; //TODO variable threads, timing, cell allocation, etc
-  //simData *sData;
+  simData *sData;
+  pthread_t simulation, render; //TODO variable threads, timing, cell allocation, etc
 
   unsigned int hozResolution, vertResolution, fps;
-  CellMatrix *grid;
-  List *cellList;
 
   if (argc != 4 && argc != 5)
   { //TODO improve argument handling
@@ -41,23 +38,21 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  initMatrix(grid, hozResolution, vertResolution);
+  logging("Beginning simulation...");
+  sData = malloc(sizeof(simData));
+  sData->returnCode = 0;
+  initMatrix(sData->grid, hozResolution, vertResolution);
   //cellList = List_init();
+  pthread_create(&simulation, NULL, simulation_main, sData);
 
 
   logging("Initializing renderer...");
-
   rData = malloc(sizeof(renderData));
   rData->hoz = hozResolution;
   rData->vert = vertResolution;
   rData->fps = fps;
   rData->returnCode = 0;
-
   pthread_create(&render, NULL, render_main, rData);
-
-
-  logging("Beginning simulation...");
-  //TODO sim spin-up
 
   //wrap up threads
   pthread_join(render, NULL);

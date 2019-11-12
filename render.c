@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h> //debug
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -20,9 +21,6 @@ void* render_main(void *data)
 
   Display *display = XOpenDisplay(getenv("DISPLAY"));
   renderData *rData = (renderData*)data;
-  const int hoz = rData->hoz;
-  const int vert = rData->vert;
-  const int fps = rData->fps;
 
   if(display == NULL)
   {
@@ -33,17 +31,17 @@ void* render_main(void *data)
   const unsigned int display_width = DisplayWidth(display, DefaultScreen(display));
   const unsigned int display_height = DisplayHeight(display, DefaultScreen(display));
 
-  if(hoz > display_width || vert > display_height)
+  if(rData->hoz > display_width || rData->vert > display_height)
   { //oversized windows spawn within bounds of display
     logging("Render warning: Oversized window, continuing.");
-    win = createWindow(display, hoz, vert, 0, 0);
+    win = createWindow(display, rData->hoz, rData->vert, 0, 0);
   }
   else
   { //spawn in middle of screen if it'll fit
-    const int xOffset = (display_width - hoz) / 2;
-    const int yOffset = (display_height - vert) / 2;
+    const int xOffset = (display_width - rData->hoz) / 2;
+    const int yOffset = (display_height - rData->vert) / 2;
 
-    win = createWindow(display, hoz, vert, xOffset, yOffset);
+    win = createWindow(display, rData->hoz, rData->vert, xOffset, yOffset);
   }
 
   while(!done)
@@ -53,11 +51,16 @@ void* render_main(void *data)
 
     do
     { //FIXME sucky busy waiting
-      if(frames < fps)
+      if(frames < rData->fps)
       {
-        //drawFrame(win, rData->grid);
-        frames++;
+        if(rData->grid->modified)
+        {
+          //drawFrame(win, rData->grid);
+          frames++; //move out of if? should skipped frames count?
+        }
       }
+
+      //TODO if window dies, set done true and exit gracefully.
     }
     while(lastFrame == time(0));
   }
@@ -69,7 +72,7 @@ void* render_main(void *data)
 }
 
 /*void drawFrame(Window win, CellMatrix *grid)
-{
+{ //gets dirty reads, who cares
 
 }*/
 

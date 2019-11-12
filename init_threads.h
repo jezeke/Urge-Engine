@@ -9,19 +9,19 @@
 
 typedef struct renderData
 {
-  int hoz;
-  int vert;
-  int fps;
+  unsigned int hoz;
+  unsigned int vert;
+  unsigned int fps;
   CellMatrix *grid;
-  List *cellList;
+  List *cellList; //needed?
   int returnCode;
 } renderData;
 
-/*typedef struct simData
+typedef struct simData
 {
   CellMatrix *grid;
   List *cellList;
   int returnCode;
-} simulationData; */
+} simData;
 
 #endif
