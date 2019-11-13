@@ -53,9 +53,9 @@ void* render_main(void *data)
     { //FIXME sucky busy waiting
       if(frames < rData->fps)
       {
-        if(rData->grid->modified)
+        if(rData->matrix->modified)
         {
-          //drawFrame(win, rData->grid);
+          //drawFrame(win, rData->matrix);
           frames++; //move out of if? should skipped frames count?
         }
       }
@@ -71,7 +71,7 @@ void* render_main(void *data)
   return NULL;
 }
 
-/*void drawFrame(Window win, CellMatrix *grid)
+/*void drawFrame(Window win, CellMatrix *matrix)
 { //gets dirty reads, who cares
 
 }*/

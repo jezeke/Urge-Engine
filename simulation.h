@@ -22,6 +22,7 @@ typedef struct Material
 {
   double mass;
   double heat;
+  int fixed; //bool
   //need some way of defining reaction properties...maybe structs isnt the way
 } Material;
 
@@ -38,7 +39,7 @@ typedef struct CellMatrix
   unsigned int hoz;
   unsigned int vert;
   int modified; //bool
-  Cell **matrix;
+  Cell ***grid; //stored non-contiguously currently. need to redesign how empty cells are stored if needed contiguous for rendering
 } CellMatrix;
 
 void* simulation_main(void *data);

@@ -1,6 +1,6 @@
 EXEC=urge
 CC=gcc
-CFLAGS=-Wall -O3 -g
+CFLAGS=-Wall -g
 OBJ=list.o logging.o render.o simulation.o
 
 urge: init.c $(OBJ)

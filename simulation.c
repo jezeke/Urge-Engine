@@ -2,9 +2,9 @@
 #include "init_threads.h"
 #include <math.h>
 
-void updateTemp(CellMatrix *data);
+void updateTemp(CellMatrix *matrix);
 
-void updatePosition(CellMatrix *data);
+void updatePosition(CellMatrix *matrix);
 
 void* simulation_main(void *data)
 {
@@ -12,17 +12,17 @@ void* simulation_main(void *data)
 
   while(1) //FIXME sucky busy waiting with no proper exit condition
   {
-    updatePosition(sData->grid); //this seems like a bad way of doing things
-    updateTemp(sData->grid); //should combine temp & pos?
+    updatePosition(sData->matrix); //this seems like a bad way of doing things
+    updateTemp(sData->matrix); //should combine temp & pos?
   }
 }
 
-void updateTemp(CellMatrix *data) //can we do this at the same time as position updating?
+void updateTemp(CellMatrix *matrix) //can we do this at the same time as position updating?
 {
 
 }
 
-void updatePosition(CellMatrix *data) //combine with reagent reaction sim?
+void updatePosition(CellMatrix *matrix) //combine with reagent reaction sim?
 {
 
 }

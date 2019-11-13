@@ -12,25 +12,23 @@
 
 void printUsage();
 
-void initMatrix(CellMatrix *grid, unsigned int hoz, unsigned int vert);
+void initMatrix(CellMatrix *matrix, const unsigned int hoz, const unsigned int vert);
+
+void freeMatrix(CellMatrix *matrix);
 
 int main(int argc, char *argv[])
 {
-  renderData *rData;
-  simData *sData;
   pthread_t simulation, render; //TODO variable threads, timing, cell allocation, etc
 
-  unsigned int hozResolution, vertResolution, fps;
-
-  if (argc != 4 && argc != 5)
+  if (argc != 4)
   { //TODO improve argument handling
     printUsage();
     return 1;
   }
 
-  hozResolution = atoi(argv[1]);
-  vertResolution = atoi(argv[2]);
-  fps = atoi(argv[3]);
+  const int hozResolution = atoi(argv[1]);
+  const int vertResolution = atoi(argv[2]);
+  const int fps = atoi(argv[3]);
 
   if(hozResolution <= 0 || vertResolution <= 0 || fps <= 0)
   {
@@ -39,35 +37,42 @@ int main(int argc, char *argv[])
   }
 
   logging("Beginning simulation...");
-  sData = malloc(sizeof(simData));
+  simData *sData = malloc(sizeof(simData));
   sData->returnCode = 0;
-  initMatrix(sData->grid, hozResolution, vertResolution);
+
+  sData->matrix = malloc(sizeof(CellMatrix));
+  initMatrix(sData->matrix, hozResolution, vertResolution);
+
   //cellList = List_init();
-  pthread_create(&simulation, NULL, simulation_main, sData);
+  //pthread_create(&simulation, NULL, simulation_main, sData);
 
 
   logging("Initializing renderer...");
-  rData = malloc(sizeof(renderData));
+  renderData *rData = malloc(sizeof(renderData));
   rData->hoz = hozResolution;
   rData->vert = vertResolution;
   rData->fps = fps;
   rData->returnCode = 0;
-  pthread_create(&render, NULL, render_main, rData);
+  //pthread_create(&render, NULL, render_main, rData);
 
   //wrap up threads
-  pthread_join(render, NULL);
+  //pthread_join(render, NULL);
   //pthread_join(simuation, NULL);
 
   //clean up
-  free(rData);
-  //freeMatrix(grid);
+  freeMatrix(sData->matrix);
+  free(sData->matrix);
   //List_free(cellList, &free);
 
-  if(rData->returnCode != 0 /*|| simData->returnCode != 0*/)
+  if(rData->returnCode != 0 /*|| sData->returnCode != 0*/)
   {
+    free(rData);
+    //free(sData);
     return -1; //executed with some error
   }
 
+  free(rData);
+  free(sData);
   return 0;
 }
 
@@ -77,16 +82,32 @@ void printUsage()
   //TODO change
 }
 
-void initMatrix(CellMatrix *grid, unsigned int hoz, unsigned int vert)
-{ //grid[x][y] ; grid[hoz][vert]
-  grid = malloc(sizeof(CellMatrix));
-  grid->hoz = hoz;
-  grid->vert = vert;
-  grid->modified = 0;
+void initMatrix(CellMatrix *matrix, const unsigned int hoz, const unsigned int vert)
+{ //matrix[x][y] ; matrix[hoz][vert]
+  matrix->modified = 0;
+  matrix->hoz = hoz;
+  matrix->vert = vert; //might as well do this here
 
-  grid->matrix = malloc(sizeof(Cell)*hoz);
-  for(int i = 0; i < vert; i++)
+  matrix->grid = malloc(sizeof(Cell**)*hoz);
+  for(int i = 0; i < hoz; i++)
   {
-    grid->matrix[i] = NULL;
+    matrix->grid[i] = malloc(sizeof(Cell*)*vert);
+    for(int j = 0; j < vert; j++)
+    {
+      matrix->grid[i][j] = NULL;
+    }
   }
+}
+
+void freeMatrix(CellMatrix *matrix)
+{
+  for(int i = 0; i < matrix->hoz; i++)
+  {
+    for(int j = 0; j < matrix->vert; j++)
+    {
+      free(matrix->grid[i][j]);
+    }
+    free(matrix->grid[i]);
+  }
+  free(matrix->grid);
 }

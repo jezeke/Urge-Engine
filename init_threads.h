@@ -12,14 +12,14 @@ typedef struct renderData
   unsigned int hoz;
   unsigned int vert;
   unsigned int fps;
-  CellMatrix *grid;
+  CellMatrix *matrix;
   List *cellList; //needed?
   int returnCode;
 } renderData;
 
 typedef struct simData
 {
-  CellMatrix *grid;
+  CellMatrix *matrix;
   List *cellList;
   int returnCode;
 } simData;
